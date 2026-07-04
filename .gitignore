@@ -1,0 +1,48 @@
+# Node / frontend
+node_modules/
+dist/
+build/
+.vite/
+.next/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python / backend
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Generated score files and local processing artifacts
+uploads/
+outputs/
+tmp/
+temp/
+*.mid
+*.midi
+
+# Local planning notes not pushed to GitHub yet
+docs/superpowers/specs/*.md
+docs/superpowers/plans/*.md
+
+# Local git worktrees
+.worktrees/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -35,7 +35,13 @@ def convert_melody_events(events: list[MelodyEvent]) -> ConversionResult:
             continue
 
         jianpu = midi_to_jianpu(event.midi_pitch)
-        harmonica = _map_harmonica_or_warn(event, warnings)
+        harmonica = _map_harmonica_or_warn(
+            midi_pitch=event.midi_pitch,
+            measure=event.measure,
+            beat=event.beat,
+            source_name=event.source_name,
+            warnings=warnings,
+        )
 
         converted.append(
             JianpuEvent(
@@ -53,13 +59,17 @@ def convert_melody_events(events: list[MelodyEvent]) -> ConversionResult:
 
 
 def _map_harmonica_or_warn(
-    event: MelodyEvent, warnings: list[str]
+    midi_pitch: int,
+    measure: int,
+    beat: float,
+    source_name: str | None,
+    warnings: list[str],
 ) -> HarmonicaPosition | None:
     try:
-        return map_midi_to_harmonica(event.midi_pitch)
+        return map_midi_to_harmonica(midi_pitch)
     except ValueError:
         warnings.append(
-            f"第 {event.measure} 小节第 {event.beat} 拍的音 "
-            f"{event.source_name or event.midi_pitch} 超出 12 孔 C 调半音阶口琴范围"
+            f"第 {measure} 小节第 {beat} 拍的音 "
+            f"{source_name or midi_pitch} 超出 12 孔 C 调半音阶口琴范围"
         )
         return None

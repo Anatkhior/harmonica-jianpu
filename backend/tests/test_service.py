@@ -13,8 +13,14 @@ def test_converts_events_to_jianpu_and_harmonica():
 
     assert result.warnings == []
     assert [event.symbol for event in result.events] == ["1", "#1", "0"]
+    assert [event.measure for event in result.events] == [1, 1, 1]
+    assert [event.beat for event in result.events] == [1.0, 2.0, 3.0]
+    assert [event.duration_quarter for event in result.events] == [1.0, 1.0, 1.0]
     assert result.events[0].harmonica.label == "1吹"
     assert result.events[1].harmonica.label == "1吹按键"
+    assert result.events[2].octave == 0
+    assert result.events[2].harmonica is None
+    assert result.events[2].is_rest is True
 
 
 def test_reports_out_of_range_notes():

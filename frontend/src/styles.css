@@ -98,13 +98,24 @@ input {
   cursor: pointer;
 }
 
-.upload-button input {
-  display: none;
-}
-
-.upload-button[aria-disabled="true"] {
+.upload-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.upload-button:focus-visible {
+  outline: 3px solid #9fd7cb;
+  outline-offset: 2px;
+}
+
+.visually-hidden-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
 }
 
 .notice {
@@ -159,7 +170,8 @@ input {
 
 .note-cell {
   display: inline-grid;
-  width: 64px;
+  min-width: 64px;
+  max-width: 112px;
   min-height: 54px;
   padding: 6px 8px;
   place-items: center;
@@ -179,6 +191,7 @@ input {
   color: #526168;
   font-size: 12px;
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .warnings {

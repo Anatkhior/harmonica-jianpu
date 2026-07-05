@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Upload } from "lucide-react";
 
 type FileUploaderProps = {
@@ -6,11 +7,22 @@ type FileUploaderProps = {
 };
 
 export function FileUploader({ disabled, onFileSelected }: FileUploaderProps) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
   return (
-    <label className="upload-button" aria-disabled={disabled}>
-      <Upload size={18} aria-hidden="true" />
-      上传乐谱
+    <>
+      <button
+        className="upload-button"
+        disabled={disabled}
+        type="button"
+        onClick={() => inputRef.current?.click()}
+      >
+        <Upload size={18} aria-hidden="true" />
+        上传乐谱
+      </button>
       <input
+        ref={inputRef}
+        className="visually-hidden-file"
         type="file"
         accept=".musicxml,.xml,.mxl"
         disabled={disabled}
@@ -22,6 +34,6 @@ export function FileUploader({ disabled, onFileSelected }: FileUploaderProps) {
           event.target.value = "";
         }}
       />
-    </label>
+    </>
   );
 }

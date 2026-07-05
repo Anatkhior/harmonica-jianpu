@@ -11,7 +11,7 @@ export async function convertScore(file: File): Promise<ConversionResponse> {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: "转换失败" }));
-    throw new Error(error.detail ?? "转换失败");
+    throw new Error(typeof error.detail === "string" ? error.detail : "转换失败");
   }
 
   return response.json();

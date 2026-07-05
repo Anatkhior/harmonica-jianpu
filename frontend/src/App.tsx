@@ -10,6 +10,7 @@ import type { ConversionResponse } from "./types";
 export default function App() {
   const [fileText, setFileText] = useState("");
   const [fileName, setFileName] = useState("");
+  const [previewMessage, setPreviewMessage] = useState("");
   const [result, setResult] = useState<ConversionResponse | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,10 +20,15 @@ export default function App() {
     setError("");
     setResult(null);
     setFileName(file.name);
+    setPreviewMessage("");
 
     try {
-      const text = await file.text();
-      setFileText(text);
+      if (file.name.toLowerCase().endsWith(".mxl")) {
+        setFileText("");
+        setPreviewMessage("MXL 文件可以转换，但当前版本暂不支持前端原谱预览。");
+      } else {
+        setFileText(await file.text());
+      }
       setResult(await convertScore(file));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "转换失败");
@@ -50,7 +56,7 @@ export default function App() {
               <h2>原谱</h2>
               {fileName ? <span>{fileName}</span> : null}
             </div>
-            <ScorePreview musicXml={fileText} />
+            <ScorePreview message={previewMessage} musicXml={fileText} />
           </section>
           <section className="pane" aria-label="转换结果">
             <div className="pane-heading">

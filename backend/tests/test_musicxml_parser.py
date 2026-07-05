@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from app.parsing.musicxml_parser import parse_musicxml
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -19,3 +21,19 @@ def test_parses_flat_input_as_pitch_notation():
 
     assert events[0].midi_pitch == 61
     assert events[0].source_name == "D-4"
+
+
+def test_parses_rests():
+    events = parse_musicxml(FIXTURES / "rest_input.musicxml")
+
+    assert events[0].midi_pitch is None
+    assert events[0].source_name is None
+    assert events[0].is_rest is True
+    assert events[0].measure == 1
+    assert events[0].beat == 1.0
+    assert events[0].duration_quarter == 1.0
+
+
+def test_rejects_chords_for_single_melody_mvp():
+    with pytest.raises(ValueError, match="Only single-line melody MusicXML is supported"):
+        parse_musicxml(FIXTURES / "chord_input.musicxml")

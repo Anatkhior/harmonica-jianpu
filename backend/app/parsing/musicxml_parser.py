@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from music21 import converter, note
+from music21 import chord, converter, note
 
 from app.models import MelodyEvent
 
@@ -14,6 +14,9 @@ def parse_musicxml(path: Path) -> list[MelodyEvent]:
         measure_number = item.measureNumber or 0
         beat = float(getattr(item, "beat", 0.0) or 0.0)
         duration = float(item.duration.quarterLength)
+
+        if isinstance(item, chord.Chord):
+            raise ValueError("Only single-line melody MusicXML is supported")
 
         if isinstance(item, note.Rest):
             events.append(

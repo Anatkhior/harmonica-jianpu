@@ -9,11 +9,11 @@ Harmonica Jianpu is a learning-oriented web tool for chromatic harmonica beginne
 The first version focuses on a reliable core workflow:
 
 - Import MusicXML or compressed MusicXML (`.musicxml`, `.xml`, `.mxl`).
+- Optionally import PDF/images (`.pdf`, `.jpg`, `.jpeg`, `.png`) through a local Audiveris OMR installation.
 - Convert single-line melodies only.
 - Render output as `1=C` jianpu for C chromatic harmonica practice.
 - Add 12-hole C chromatic harmonica hole, breath, and slide hints.
-- Preview the original score beside the generated jianpu for checking.
-- Treat PDF/image optical music recognition as an optional later workflow.
+- Preview MusicXML source scores beside the generated jianpu for checking.
 
 Out of scope for the first version:
 
@@ -28,7 +28,7 @@ Out of scope for the first version:
 - Backend: FastAPI + Python.
 - Score parsing: MusicXML via `music21` first, with `partitura` as a possible alternative.
 - Score preview: OpenSheetMusicDisplay.
-- Optional OMR: Audiveris as the primary candidate, with oemer as an experimental alternative.
+- Optional OMR: local Audiveris CLI as a preprocessing stage that exports MusicXML.
 - Core project logic: normalized note events, jianpu rendering, and 12-hole C chromatic harmonica mapping.
 
 ## Chinese Summary
@@ -64,6 +64,29 @@ npm run dev
 
 The frontend app runs at `http://127.0.0.1:5173` by default.
 On Windows PowerShell, use `npm.cmd` instead of `npm` if script execution policy blocks npm commands.
+
+## Optional PDF/Image OMR
+
+PDF and image upload support depends on a local Audiveris installation. Harmonica Jianpu does not vendor or redistribute Audiveris.
+
+Limits for the first OMR version:
+
+- Clear printed single-line melodies only.
+- PDF files up to 3 pages.
+- Uploads up to 15MB.
+- OMR timeout defaults to 120 seconds.
+- MusicXML/MXL uploads continue to work without Audiveris.
+
+Environment variables:
+
+```powershell
+$env:AUDIVERIS_CMD = "C:\Path\To\Audiveris\bin\Audiveris.bat"
+$env:OMR_MAX_FILE_MB = "15"
+$env:OMR_MAX_PDF_PAGES = "3"
+$env:OMR_TIMEOUT_SECONDS = "120"
+```
+
+If OMR fails, use Audiveris directly to inspect or correct the recognition result, export MusicXML, then upload that MusicXML file to this app.
 
 Verification:
 

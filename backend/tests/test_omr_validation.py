@@ -2,13 +2,20 @@ from pathlib import Path
 
 import pytest
 
-from app.omr.config import OMRSettings
-from app.omr.errors import OMRValidationError
-from app.omr.validation import OMR_SUFFIXES, validate_omr_upload
+from app.omr.config import OMRSettings, load_omr_settings
+from app.omr.errors import OMRConfigurationError, OMRValidationError
+from app.omr.validation import OMR_SUFFIXES, count_pdf_pages, validate_omr_upload
 
 
 def test_omr_suffixes_include_pdf_and_images():
     assert OMR_SUFFIXES == {".pdf", ".jpg", ".jpeg", ".png"}
+
+
+def test_load_omr_settings_rejects_malformed_env(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("OMR_MAX_PDF_PAGES", "abc")
+
+    with pytest.raises(OMRConfigurationError, match="OMR 配置无效"):
+        load_omr_settings()
 
 
 def test_rejects_unsupported_omr_suffix(tmp_path: Path):
@@ -52,6 +59,28 @@ def test_accepts_pdf_within_page_limit(tmp_path: Path, monkeypatch: pytest.Monke
     monkeypatch.setattr("app.omr.validation.count_pdf_pages", lambda _: 3)
 
     validate_omr_upload(path, ".pdf", OMRSettings(max_pdf_pages=3))
+
+
+def test_counts_pages_from_real_pdf(tmp_path: Path):
+    path = tmp_path / "one-page.pdf"
+    path.write_bytes(
+        b"%PDF-1.4\n"
+        b"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
+        b"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"
+        b"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 72 72] >>\nendobj\n"
+        b"xref\n"
+        b"0 4\n"
+        b"0000000000 65535 f \n"
+        b"0000000009 00000 n \n"
+        b"0000000058 00000 n \n"
+        b"0000000115 00000 n \n"
+        b"trailer\n<< /Root 1 0 R /Size 4 >>\n"
+        b"startxref\n"
+        b"186\n"
+        b"%%EOF\n"
+    )
+
+    assert count_pdf_pages(path) == 1
 
 
 def test_rejects_unreadable_pdf(tmp_path: Path):

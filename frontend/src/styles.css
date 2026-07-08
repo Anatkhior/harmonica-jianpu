@@ -200,6 +200,15 @@ input {
   color: #8a5b0a;
 }
 
+.omr-notice {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid #b8d8ce;
+  border-radius: 8px;
+  color: #21584f;
+  background: #eef8f5;
+}
+
 @media (max-width: 860px) {
   .app-shell {
     padding: 16px;

@@ -30,6 +30,8 @@ export function ConversionResult({ result }: ConversionResultProps) {
 
   return (
     <>
+      {result.omr ? <p className="omr-notice">{result.omr.message}</p> : null}
+
       {result.warnings.length > 0 ? (
         <ul className="warnings">
           {result.warnings.map((warning, index) => (

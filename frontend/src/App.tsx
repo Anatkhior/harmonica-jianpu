@@ -14,6 +14,7 @@ export default function App() {
   const [result, setResult] = useState<ConversionResponse | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("转换中...");
 
   async function handleFileSelected(file: File) {
     setLoading(true);
@@ -21,11 +22,21 @@ export default function App() {
     setResult(null);
     setFileName(file.name);
     setPreviewMessage("");
+    setLoadingMessage("转换中...");
 
     try {
-      if (file.name.toLowerCase().endsWith(".mxl")) {
+      const lowerFileName = file.name.toLowerCase();
+      const isOmrFile = [".pdf", ".jpg", ".jpeg", ".png"].some((suffix) =>
+        lowerFileName.endsWith(suffix),
+      );
+
+      if (lowerFileName.endsWith(".mxl")) {
         setFileText("");
         setPreviewMessage("MXL 文件可以转换，但当前版本暂不支持前端原谱预览。");
+      } else if (isOmrFile) {
+        setFileText("");
+        setLoadingMessage("正在识别...");
+        setPreviewMessage("正在进行 OMR 识别，可能需要几十秒。");
       } else {
         setFileText(await file.text());
       }
@@ -63,7 +74,7 @@ export default function App() {
               <h2>简谱与口琴提示</h2>
               {result ? <span>{result.events.length} 个音符/休止符</span> : null}
             </div>
-            {loading ? <p className="muted">转换中...</p> : <ConversionResult result={result} />}
+            {loading ? <p className="muted">{loadingMessage}</p> : <ConversionResult result={result} />}
           </section>
         </div>
       </section>

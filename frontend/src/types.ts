@@ -15,7 +15,15 @@ export type JianpuEvent = {
   harmonica: HarmonicaPosition | null;
 };
 
+export type OmrMetadata = {
+  engine: string;
+  generatedMusicXml: boolean;
+  message: string;
+};
+
 export type ConversionResponse = {
   events: JianpuEvent[];
   warnings: string[];
+  sourceType?: "musicxml" | "omr";
+  omr?: OmrMetadata;
 };

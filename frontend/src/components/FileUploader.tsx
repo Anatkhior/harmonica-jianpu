@@ -24,7 +24,7 @@ export function FileUploader({ disabled, onFileSelected }: FileUploaderProps) {
         ref={inputRef}
         className="visually-hidden-file"
         type="file"
-        accept=".musicxml,.xml,.mxl"
+        accept=".musicxml,.xml,.mxl,.pdf,.jpg,.jpeg,.png"
         disabled={disabled}
         onChange={(event) => {
           const file = event.target.files?.[0];

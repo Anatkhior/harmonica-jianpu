@@ -28,16 +28,18 @@ async def convert(file: UploadFile) -> dict[str, object]:
         raise HTTPException(status_code=400, detail="Unsupported file type")
 
     content = await file.read()
-    with NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-        tmp.write(content)
-        tmp_path = Path(tmp.name)
-
+    tmp_path: Path | None = None
     try:
+        with NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            tmp_path = Path(tmp.name)
+            tmp.write(content)
+
         if suffix in OMR_SUFFIXES:
             return _convert_omr_upload(tmp_path, suffix)
         return _convert_musicxml_path(tmp_path, source_type="musicxml", omr=None)
     finally:
-        tmp_path.unlink(missing_ok=True)
+        if tmp_path is not None:
+            tmp_path.unlink(missing_ok=True)
 
 
 def _convert_omr_upload(path: Path, suffix: str) -> dict[str, object]:

@@ -70,6 +70,8 @@ test("shows OMR recognition preview while converting a PDF score", async () => {
   conversion.resolve(response);
   await waitFor(() => expect(convertScore).toHaveBeenCalledWith(file));
   expect(await screen.findByText("0 个音符/休止符")).toBeTruthy();
+  expect(screen.queryByText("正在进行 OMR 识别，可能需要几十秒。")).toBeNull();
+  expect(screen.getByText("OMR 识别完成，请在右侧核对转换结果。")).toBeTruthy();
 });
 
 test("replaces OMR recognition preview when PDF conversion fails", async () => {

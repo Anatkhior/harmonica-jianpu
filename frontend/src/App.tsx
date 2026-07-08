@@ -7,6 +7,13 @@ import { FileUploader } from "./components/FileUploader";
 import { ScorePreview } from "./components/ScorePreview";
 import type { ConversionResponse } from "./types";
 
+const OMR_EXTENSIONS = [".pdf", ".jpg", ".jpeg", ".png"];
+
+function isOmrFileName(fileName: string) {
+  const lowerFileName = fileName.toLowerCase();
+  return OMR_EXTENSIONS.some((suffix) => lowerFileName.endsWith(suffix));
+}
+
 export default function App() {
   const [fileText, setFileText] = useState("");
   const [fileName, setFileName] = useState("");
@@ -24,11 +31,10 @@ export default function App() {
     setPreviewMessage("");
     setLoadingMessage("转换中...");
 
+    const isOmrFile = isOmrFileName(file.name);
+
     try {
       const lowerFileName = file.name.toLowerCase();
-      const isOmrFile = [".pdf", ".jpg", ".jpeg", ".png"].some((suffix) =>
-        lowerFileName.endsWith(suffix),
-      );
 
       if (lowerFileName.endsWith(".mxl")) {
         setFileText("");
@@ -41,8 +47,11 @@ export default function App() {
         setFileText(await file.text());
       }
       setResult(await convertScore(file));
+      if (isOmrFile) {
+        setPreviewMessage("OMR 识别完成，请在右侧核对转换结果。");
+      }
     } catch (caught) {
-      if ([".pdf", ".jpg", ".jpeg", ".png"].some((suffix) => file.name.toLowerCase().endsWith(suffix))) {
+      if (isOmrFile) {
         setPreviewMessage("OMR 识别失败，请检查错误信息后重试。");
       }
       setError(caught instanceof Error ? caught.message : "转换失败");

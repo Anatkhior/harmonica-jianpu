@@ -42,6 +42,9 @@ export default function App() {
       }
       setResult(await convertScore(file));
     } catch (caught) {
+      if ([".pdf", ".jpg", ".jpeg", ".png"].some((suffix) => file.name.toLowerCase().endsWith(suffix))) {
+        setPreviewMessage("OMR 识别失败，请检查错误信息后重试。");
+      }
       setError(caught instanceof Error ? caught.message : "转换失败");
     } finally {
       setLoading(false);

@@ -207,6 +207,7 @@ input {
   border-radius: 8px;
   color: #21584f;
   background: #eef8f5;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 860px) {

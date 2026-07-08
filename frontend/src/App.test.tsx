@@ -20,6 +20,16 @@ beforeEach(() => {
   vi.mocked(convertScore).mockReset();
 });
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((promiseResolve, promiseReject) => {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+  return { promise, reject, resolve };
+}
+
 test("allows mxl conversion while showing preview unsupported notice", async () => {
   vi.mocked(convertScore).mockResolvedValue({ events: [], warnings: [] });
   const { container } = render(<App />);
@@ -36,7 +46,9 @@ test("allows mxl conversion while showing preview unsupported notice", async () 
 });
 
 test("shows OMR recognition preview while converting a PDF score", async () => {
-  vi.mocked(convertScore).mockResolvedValue({
+  const conversion = deferred<Awaited<ReturnType<typeof convertScore>>>();
+  vi.mocked(convertScore).mockReturnValue(conversion.promise);
+  const response = {
     events: [],
     warnings: [],
     sourceType: "omr",
@@ -45,7 +57,7 @@ test("shows OMR recognition preview while converting a PDF score", async () => {
       generatedMusicXml: true,
       message: "OMR 识别完成，请人工核对结果。",
     },
-  });
+  } satisfies Awaited<ReturnType<typeof convertScore>>;
   const { container } = render(<App />);
   const input = container.querySelector('input[type="file"]') as HTMLInputElement;
   const file = new File(["%PDF-1.7"], "song.pdf", { type: "application/pdf" });
@@ -53,6 +65,22 @@ test("shows OMR recognition preview while converting a PDF score", async () => {
   fireEvent.change(input, { target: { files: [file] } });
 
   expect(screen.getByText("正在进行 OMR 识别，可能需要几十秒。")).toBeTruthy();
+  expect(screen.getByText("正在识别...")).toBeTruthy();
   expect(screen.getByTestId("score-preview").dataset.musicxml).toBe("");
+  conversion.resolve(response);
   await waitFor(() => expect(convertScore).toHaveBeenCalledWith(file));
+  expect(await screen.findByText("0 个音符/休止符")).toBeTruthy();
+});
+
+test("replaces OMR recognition preview when PDF conversion fails", async () => {
+  vi.mocked(convertScore).mockRejectedValue(new Error("OMR engine failed"));
+  const { container } = render(<App />);
+  const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+  const file = new File(["%PDF-1.7"], "song.pdf", { type: "application/pdf" });
+
+  fireEvent.change(input, { target: { files: [file] } });
+
+  expect(await screen.findByText("OMR engine failed")).toBeTruthy();
+  expect(screen.queryByText("正在进行 OMR 识别，可能需要几十秒。")).toBeNull();
+  expect(screen.getByText("OMR 识别失败，请检查错误信息后重试。")).toBeTruthy();
 });

@@ -103,6 +103,36 @@ def test_run_audiveris_raises_engine_error_for_non_zero_returncode(tmp_path: Pat
         run_audiveris(tmp_path / "score.png", tmp_path / "out", OMRSettings(), runner=fake_runner)
 
 
+def test_run_audiveris_uses_stdout_when_non_zero_stderr_is_empty(tmp_path: Path):
+    def fake_runner(command: list[str], **_kwargs):
+        return subprocess.CompletedProcess(command, 2, stdout="stdout detail", stderr="")
+
+    with pytest.raises(OMREngineError, match="Audiveris 识别失败: stdout detail"):
+        run_audiveris(tmp_path / "score.png", tmp_path / "out", OMRSettings(), runner=fake_runner)
+
+
+def test_run_audiveris_raises_configuration_error_when_binary_cannot_start(tmp_path: Path):
+    def fake_runner(*_args, **_kwargs):
+        raise PermissionError("not executable")
+
+    with pytest.raises(OMRConfigurationError, match="当前环境无法启动 Audiveris|当前环境未配置 Audiveris"):
+        run_audiveris(tmp_path / "score.png", tmp_path / "out", OMRSettings(), runner=fake_runner)
+
+
+def test_run_audiveris_truncates_long_non_zero_stderr(tmp_path: Path):
+    long_detail = "x" * 600
+
+    def fake_runner(command: list[str], **_kwargs):
+        return subprocess.CompletedProcess(command, 1, stdout="", stderr=long_detail)
+
+    with pytest.raises(OMREngineError) as exc_info:
+        run_audiveris(tmp_path / "score.png", tmp_path / "out", OMRSettings(), runner=fake_runner)
+
+    message = str(exc_info.value)
+    assert message == f"Audiveris 识别失败: {'x' * 500}..."
+    assert len(message) < len("Audiveris 识别失败: " + long_detail)
+
+
 def test_run_audiveris_raises_engine_error_when_musicxml_is_missing(tmp_path: Path):
     output_dir = tmp_path / "out"
     output_dir.mkdir()

@@ -35,6 +35,17 @@ def build_audiveris_command(input_path: Path, output_dir: Path, settings: OMRSet
     ]
 
 
+def format_engine_detail(stdout: str, stderr: str, max_length: int = 500) -> str:
+    for detail in (stderr, stdout, "unknown error"):
+        detail = detail.strip()
+        if detail:
+            break
+
+    if len(detail) > max_length:
+        return f"{detail[:max_length]}..."
+    return detail
+
+
 def run_audiveris(
     input_path: Path,
     output_dir: Path,
@@ -55,6 +66,10 @@ def run_audiveris(
         raise OMRConfigurationError(
             "当前环境未配置 Audiveris，请安装后设置 AUDIVERIS_CMD，或上传 MusicXML/MXL。"
         ) from exc
+    except OSError as exc:
+        raise OMRConfigurationError(
+            "当前环境无法启动 Audiveris，请检查 AUDIVERIS_CMD 是否可执行，或上传 MusicXML/MXL。"
+        ) from exc
     except subprocess.TimeoutExpired as exc:
         raise OMRTimeoutError("OMR 识别超时，请尝试更清晰或页数更少的谱面。") from exc
 
@@ -62,7 +77,7 @@ def run_audiveris(
     stderr = completed.stderr or ""
 
     if completed.returncode != 0:
-        detail = (stderr or stdout or "unknown error").strip()
+        detail = format_engine_detail(stdout, stderr)
         raise OMREngineError(f"Audiveris 识别失败: {detail}")
 
     musicxml_path = find_generated_musicxml(output_dir)

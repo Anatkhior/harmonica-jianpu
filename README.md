@@ -1,5 +1,7 @@
 # Harmonica Jianpu
 
+**English** | [简体中文](README.zh-CN.md)
+
 Convert single-line sheet music into jianpu and playing guidance for 12-hole C chromatic harmonica.
 
 Harmonica Jianpu is a learning-oriented web tool for chromatic harmonica beginners. It converts staff notation into beginner-friendly numbered musical notation and adds 12-hole C chromatic harmonica guidance, including hole number, breath direction, and slide usage.
